@@ -33,14 +33,14 @@ type Block struct {
 
 type ErigonTraceData struct {
     Jsonrpc     string	`json:"jsonrpc"`
-    Id  string	`json:"id"`
+    Id  int	`json:"id"`
     Result      []ErigonBlockData	`json:"result"`
 }
 
 type ErigonBlockData struct {
     Action    ErigonAction	`json:"action"`
     BlockHash    string	`json:"blockHash"`
-    BlockNumber    string	`json:"blockNumber"`
+    BlockNumber    int	`json:"blockNumber"`
     Result ErigonBlockResult	`json:"result"`
     Subtraces    int	`json:"subtraces"`
     TraceAddress    []string	`json:"traceAddress"`
@@ -85,7 +85,7 @@ func organizeData(gethTraceBlockData Block) ErigonBlockData{
     subCallCount := len(gethTraceBlockData.Calls)
 
     oneBlock.BlockHash = ""
-    oneBlock.BlockNumber = ""
+    oneBlock.BlockNumber = 16636490
     oneBlock.Subtraces = subCallCount
     oneBlock.TransactionHash = ""
     oneBlock.TransactionPosition = ""
@@ -128,7 +128,7 @@ func main() {
     json.Unmarshal(byteValue, &gethTraceData)
     
     erigonTraceData.Jsonrpc = gethTraceData.Jsonrpc
-    erigonTraceData.Id = "0"
+    erigonTraceData.Id = 0
 
     for i := 0; i < len(gethTraceData.Result); i++ {
         gethTraceBlockData := gethTraceData.Result[i].Result
