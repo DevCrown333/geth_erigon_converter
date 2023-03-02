@@ -42,7 +42,7 @@ type ErigonBlockData struct {
     BlockHash    string	`json:"blockHash"`
     BlockNumber    string	`json:"blockNumber"`
     Result ErigonBlockResult	`json:"result"`
-    Subtraces    string	`json:"subtraces"`
+    Subtraces    int	`json:"subtraces"`
     TraceAddress    []string	`json:"traceAddress"`
     TransactionHash    string	`json:"transactionHash"`
     TransactionPosition    string	`json:"transactionPosition"`
@@ -82,9 +82,11 @@ func organizeData(gethTraceBlockData Block) ErigonBlockData{
 	    oneBlock.Result.Output = "0x"
     }
 
+    subCallCount := len(gethTraceBlockData.Calls)
+
     oneBlock.BlockHash = ""
     oneBlock.BlockNumber = ""
-    oneBlock.Subtraces = "0"
+    oneBlock.Subtraces = subCallCount
     oneBlock.TransactionHash = ""
     oneBlock.TransactionPosition = ""
     
@@ -94,6 +96,7 @@ func organizeData(gethTraceBlockData Block) ErigonBlockData{
 func handleSubCalls(gethTraceBlockData Block) {
     for j := 0; j < len(gethTraceBlockData.Calls); j++ {
         callBlock := organizeData(gethTraceBlockData.Calls[j])
+        
         erigonTraceData.Result = append(erigonTraceData.Result, callBlock)
         if len(gethTraceBlockData.Calls[j].Calls) > 0 {
             handleSubCalls(gethTraceBlockData.Calls[j])
