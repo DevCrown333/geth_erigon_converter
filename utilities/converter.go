@@ -146,7 +146,7 @@ func main() {
     // for i := 0; i < len(erigonTraceData.Result); i++ {
 	// fmt.Println("from: " + erigonTraceData.Result[i].Action.From)
     // }
-    file, _ := json.MarshalIndent(erigonTraceData, "", " ")
+    file, _ := json.MarshalIndent(erigonTraceData, "", "\t")
 
     _ = ioutil.WriteFile("erigon_output1.json", file, 0644)
 
