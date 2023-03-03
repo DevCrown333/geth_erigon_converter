@@ -43,9 +43,9 @@ type ErigonBlockData struct {
     BlockNumber    int	`json:"blockNumber"`
     Result ErigonBlockResult	`json:"result"`
     Subtraces    int	`json:"subtraces"`
-    TraceAddress    []string	`json:"traceAddress"`
+    TraceAddress    []int	`json:"traceAddress"`
     TransactionHash    string	`json:"transactionHash"`
-    TransactionPosition    string	`json:"transactionPosition"`
+    TransactionPosition    int	`json:"transactionPosition"`
     Type    string	`json:"type"`
 }
 
@@ -63,7 +63,7 @@ type ErigonAction struct {
     Value    string	`json:"value"`
 }
 
-func organizeData(gethTraceBlockData Block) ErigonBlockData{
+func organizeData(gethTraceBlockData Block, index int, callStack []int) ErigonBlockData{
     var oneBlock ErigonBlockData
     var action ErigonAction
     action.From = gethTraceBlockData.From
@@ -88,18 +88,23 @@ func organizeData(gethTraceBlockData Block) ErigonBlockData{
     oneBlock.BlockNumber = 16636490
     oneBlock.Subtraces = subCallCount
     oneBlock.TransactionHash = ""
-    oneBlock.TransactionPosition = ""
+    oneBlock.TransactionPosition = index
+
+    // if callStack != -1 {
+    oneBlock.TraceAddress = callStack
+    // }
     
     return oneBlock
 }
 
-func handleSubCalls(gethTraceBlockData Block) {
+func handleSubCalls(gethTraceBlockData Block, index int, callStack []int) {
     for j := 0; j < len(gethTraceBlockData.Calls); j++ {
-        callBlock := organizeData(gethTraceBlockData.Calls[j])
+        traceAddress := append(callStack, j);
+        callBlock := organizeData(gethTraceBlockData.Calls[j], index, traceAddress)
         
         erigonTraceData.Result = append(erigonTraceData.Result, callBlock)
-        if len(gethTraceBlockData.Calls[j].Calls) > 0 {
-            handleSubCalls(gethTraceBlockData.Calls[j])
+        if len(gethTraceBlockData.Calls[j].Calls) > 0 { 
+            handleSubCalls(gethTraceBlockData.Calls[j], index, traceAddress)
         }
     }
 }
@@ -120,9 +125,9 @@ func main() {
     // read our opened xmlFile as a byte array.
     byteValue, _ := ioutil.ReadAll(jsonFile)
 
-    // we initialize our Users array
+    // we initialize our Users array    
     var gethTraceData GethTraceData
-
+    var initial_subtrace []int
     // we unmarshal our byteArray which contains our
     // jsonFile's content into 'users' which we defined above
     json.Unmarshal(byteValue, &gethTraceData)
@@ -132,10 +137,10 @@ func main() {
 
     for i := 0; i < len(gethTraceData.Result); i++ {
         gethTraceBlockData := gethTraceData.Result[i].Result
-        oneBlock := organizeData(gethTraceBlockData)
+        oneBlock := organizeData(gethTraceBlockData, i, initial_subtrace)
         erigonTraceData.Result = append(erigonTraceData.Result, oneBlock)
         
-        handleSubCalls(gethTraceBlockData)
+        handleSubCalls(gethTraceBlockData, i, initial_subtrace)
     }
 
     // for i := 0; i < len(erigonTraceData.Result); i++ {
