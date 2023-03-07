@@ -127,7 +127,7 @@ func main() {
 
     // we initialize our Users array    
     var gethTraceData GethTraceData
-    var initial_subtrace []int
+    initial_subtrace := []int{}
     // we unmarshal our byteArray which contains our
     // jsonFile's content into 'users' which we defined above
     json.Unmarshal(byteValue, &gethTraceData)
