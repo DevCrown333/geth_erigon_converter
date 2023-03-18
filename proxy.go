@@ -5,6 +5,7 @@ import (
     "fmt"
     "io/ioutil"
     "os"
+    "log"
     "strings"
     "bytes"
     "net/http"
@@ -221,7 +222,7 @@ func eth_getLogs(c *gin.Context) {
         Method: "eth_getLogs",
         Params: param,
         Id : 1,
-        Jsonrpc: "2.0"
+        Jsonrpc: "2.0",
     }
 
     json_data, err := json.Marshal(ApiParam)
@@ -257,7 +258,7 @@ func eth_getTransactionByHash(c *gin.Context) {
         Method: "eth_getTransactionByHash",
         Params: param,
         Id : 1,
-        Jsonrpc: "2.0"
+        Jsonrpc: "2.0",
     }
 
     json_data, err := json.Marshal(ApiParam)
@@ -297,7 +298,7 @@ func eth_getBlockByNumber(c *gin.Context) {
         Method: "eth_getBlockByNumber",
         Params: param,
         Id : 1,
-        Jsonrpc: "2.0"
+        Jsonrpc: "2.0",
     }
 
     json_data, err := json.Marshal(ApiParam)
@@ -337,7 +338,7 @@ func eth_getTransactionReceipt(c *gin.Context) {
         Method: "eth_getTransactionReceipt",
         Params: param,
         Id : 1,
-        Jsonrpc: "2.0"
+        Jsonrpc: "2.0",
     }
 
     json_data, err := json.Marshal(ApiParam)
