@@ -1,38 +1,38 @@
-curl http://localhost:8080/eth_getTransactionByHash \
+curl http://localhost:8085/eth_getTransactionByHash \
     --include \
     --header "Content-Type: application/json" \
     --request "POST" \
     --data '{"method":"eth_getTransactionByHash","params":["0xb1fac2cb5074a4eda8296faebe3b5a3c10b48947dd9a738b2fdf859be0e1fbaf"],"id":1,"jsonrpc":"2.0"}'
 
-curl http://localhost:8080/eth_getBlockByNumber \
+curl http://localhost:8085/eth_getBlockByNumber \
   -X POST \
   -H "Content-Type: application/json" \
   --data '{"method":"eth_getBlockByNumber","params":["0xc5043f",false],"id":1,"jsonrpc":"2.0"}'
 
 
-curl http://localhost:8080/eth_getTransactionReceipt \
+curl http://localhost:8085/eth_getTransactionReceipt \
 -X POST \
 -H "Content-Type: application/json" \
 --data '{"method":"eth_getTransactionReceipt","params":["0x85d995eba9763907fdf35cd2034144dd9d53ce32cbec21349d4b12823c6860c5"],"id":1,"jsonrpc":"2.0"}'
 
-curl http://localhost:8080/eth_getTransactionReceipt \
+curl http://localhost:8085/eth_getTransactionReceipt \
   -X POST \
   -H "Content-Type: application/json" \
   --data '{"method":"eth_getLogs","params":[{"address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"}],"id":1,"jsonrpc":"2.0"}'
 
 
-curl http://localhost:8080/trace_block \
+curl http://localhost:8085/trace_block \
   -X POST \
   -H "Content-Type: application/json" \
   --data '{"method":"trace_block","params":["0xccb93d"],"id":1,"jsonrpc":"2.0"}'
 
 
-curl http://localhost:8080/trace_transaction \
+curl http://localhost:8085/trace_transaction \
   -X POST \
   -H "Content-Type: application/json" \
   --data '{"method":"trace_transaction","params":["0x3277c743c14e482243862c03a70e83ccb52e25cb9e54378b20a8303f15cb985d"],"id":1,"jsonrpc":"2.0"}'  
 
-curl http://localhost:8080/eth_getLogs \
+curl http://localhost:8085/eth_getLogs \
   -X POST \
   -H "Content-Type: application/json" \
   --data '{"method":"eth_getLogs","params":[{"address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"}],"id":1,"jsonrpc":"2.0"}'
