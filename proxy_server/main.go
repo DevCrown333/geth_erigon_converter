@@ -516,6 +516,38 @@ func eth_getBlockByHash(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, string(body))
 }
 
+func web3_clientVersion(c *gin.Context) {
+	var param ApiBlockParam
+
+	// Call BindJSON to bind the received JSON to
+	// param.
+	if err := c.BindJSON(&param); err != nil {
+		return
+	}
+
+	json_data, err := json.Marshal(param)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := http.Post(QuickNodeURL, "application/json",
+		bytes.NewBuffer(json_data))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.IndentedJSON(http.StatusOK, string(body))
+}
+
 func main() {
 	router := gin.Default()
 	fmt.Println("Proxy server started!")
@@ -526,6 +558,7 @@ func main() {
 	router.POST("/eth_getTransactionReceipt", eth_getTransactionReceipt)
 	router.POST("/trace_block", trace_block)
 	router.POST("/trace_transaction", trace_transaction)
+	router.POST("/web3_clientVersion", web3_clientVersion)
 
 	router.Run("localhost:8085")
 }
