@@ -93,6 +93,11 @@ type EthGetBlockByNumberParam struct {
 	DetailFlag  bool   `json:"detailFlag,omitempty"`
 }
 
+type EthGetBlockByHashParam struct {
+	BlockHash  string `json:"hash"`
+	DetailFlag bool   `json:"detailFlag,omitempty"`
+}
+
 type EthGetTransactionReceiptParam struct {
 	Hash string `json:"hash"`
 }
@@ -471,12 +476,53 @@ func trace_block(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, erigonTraceData)
 }
 
+func eth_getBlockByHash(c *gin.Context) {
+	var param ApiBlockParam
+
+	// Call BindJSON to bind the received JSON to
+	// param.
+	if err := c.BindJSON(&param); err != nil {
+		return
+	}
+
+	// Construct API parameter.
+	// ApiParam := ApiReceiptParam {
+	//     Method: "eth_getTransactionReceipt",
+	//     Params: []string{param.Hash},
+	//     Id : 1,
+	//     Jsonrpc: "2.0",
+	// }
+
+	json_data, err := json.Marshal(param)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := http.Post(QuickNodeURL, "application/json",
+		bytes.NewBuffer(json_data))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.IndentedJSON(http.StatusOK, string(body))
+}
+
 func main() {
 	router := gin.Default()
 	fmt.Println("Proxy server started!")
 	router.POST("/eth_getLogs", eth_getLogs)
 	router.POST("/eth_getTransactionByHash", eth_getTransactionByHash)
 	router.POST("/eth_getBlockByNumber", eth_getBlockByNumber)
+	router.POST("/eth_getBlockByHash", eth_getBlockByHash)
 	router.POST("/eth_getTransactionReceipt", eth_getTransactionReceipt)
 	router.POST("/trace_block", trace_block)
 	router.POST("/trace_transaction", trace_transaction)
