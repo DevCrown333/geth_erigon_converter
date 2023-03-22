@@ -14,7 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const QuickNodeURL = "https://black-dark-meadow.quiknode.pro/1a15b493e4c3bc9e6aab158ea100180b05a1944a/"
+//const QuickNodeURL = "https://black-dark-meadow.quiknode.pro/1a15b493e4c3bc9e6aab158ea100180b05a1944a/"
+
+// Arbitrum endpoint
+const QuickNodeURL = "https://delicate-white-sun.arbitrum-mainnet.quiknode.pro/21626551b888b87bc34981c0006d74dc4dd8bd87/"
 
 type GethBlockTraceData struct {
 	Jsonrpc string
@@ -548,6 +551,38 @@ func web3_clientVersion(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, string(body))
 }
 
+func default_response(c *gin.Context) {
+	var param ApiBlockParam
+
+	// Call BindJSON to bind the received JSON to
+	// param.
+	if err := c.BindJSON(&param); err != nil {
+		return
+	}
+
+	json_data, err := json.Marshal(param)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := http.Post(QuickNodeURL, "application/json",
+		bytes.NewBuffer(json_data))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.IndentedJSON(http.StatusOK, string(body))
+}
+
 func main() {
 	router := gin.Default()
 	fmt.Println("Proxy server started!")
@@ -559,6 +594,7 @@ func main() {
 	router.POST("/trace_block", trace_block)
 	router.POST("/trace_transaction", trace_transaction)
 	router.POST("/web3_clientVersion", web3_clientVersion)
+	router.POST("/", default_response)
 
 	router.Run("localhost:8085")
 }

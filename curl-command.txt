@@ -36,3 +36,7 @@ curl http://localhost:8085/eth_getLogs \
   -X POST \
   -H "Content-Type: application/json" \
   --data '{"method":"eth_getLogs","params":[{"address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"}],"id":1,"jsonrpc":"2.0"}'
+
+curl http://localhost:8085/ \
+  -X POST \
+  -H "Content-Type: application/json"
