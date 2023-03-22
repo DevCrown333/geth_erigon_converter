@@ -92,8 +92,8 @@ type EthGetTransactionParam struct {
 }
 
 type EthGetBlockByNumberParam struct {
-	BlockNumber string `json:"blockNumber"`
-	DetailFlag  bool   `json:"detailFlag,omitempty"`
+	BlockNumber int  `json:"blockNumber"`
+	DetailFlag  bool `json:"detailFlag,omitempty"`
 }
 
 type EthGetBlockByHashParam struct {
