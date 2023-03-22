@@ -368,7 +368,7 @@ func eth_getBlockByNumber(c *gin.Context) {
     c.IndentedJSON(http.StatusOK, string(body))
 }
 
-func debug_traceTransaction(c *gin.Context) {
+func trace_transaction(c *gin.Context) {
     var param ApiTransactionParam
 
     // Call BindJSON to bind the received JSON to
@@ -377,6 +377,10 @@ func debug_traceTransaction(c *gin.Context) {
         return
     }
 
+    param.Method = "debug_traceTransaction"
+    param.Params = append(param.Params, map[string]string{
+        "tracer": "callTracer",
+    })
     // Construct API parameter.
     // ApiParam := ApiTransactionParam {
     //     Method: "eth_getTransactionByHash",
@@ -414,7 +418,7 @@ func debug_traceTransaction(c *gin.Context) {
     c.IndentedJSON(http.StatusOK, erigonTraceData)
 }
 
-func debug_traceBlockByNumber(c *gin.Context) {
+func trace_block(c *gin.Context) {
     var param ApiBlockParam
 
     // Call BindJSON to bind the received JSON to
@@ -423,6 +427,10 @@ func debug_traceBlockByNumber(c *gin.Context) {
         return
     }
 
+    param.Method = "debug_traceBlockByNumber"
+    param.Params = append(param.Params, map[string]string{
+        "tracer": "callTracer",
+    })
     // Construct API parameter.
     // ApiParam := ApiBlockParam {
     //     Method: "eth_getBlockByNumber",
@@ -469,8 +477,8 @@ func main() {
     router.POST("/eth_getTransactionByHash", eth_getTransactionByHash)
     router.POST("/eth_getBlockByNumber", eth_getBlockByNumber)    
     router.POST("/eth_getTransactionReceipt", eth_getTransactionReceipt)
-    router.POST("/debug_traceBlockByNumber", debug_traceBlockByNumber)
-    router.POST("/debug_traceTransaction", debug_traceTransaction)
+    router.POST("/trace_block", trace_block)
+    router.POST("/trace_transaction", trace_transaction)
 
     router.Run("localhost:8080")
 }
