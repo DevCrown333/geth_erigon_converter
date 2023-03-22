@@ -59,7 +59,7 @@ Once the code is running, you have a running HTTP server to which you can send r
 
 From a new command line window, use curl to make a request to your running web service.
 
-$ curl http://localhost:8080/eth_getTransactionByHash \
+$ curl http://localhost:8085/eth_getTransactionByHash \
  --include \
  --header "Content-Type: application/json" \
  --request "POST" \
