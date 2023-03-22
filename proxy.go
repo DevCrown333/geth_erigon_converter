@@ -4,7 +4,7 @@ import (
     "encoding/json"
     "fmt"
     "io/ioutil"
-    "os"
+    // "os"
     "log"
     "strings"
     "bytes"
@@ -76,11 +76,11 @@ type ErigonAction struct {
 }
 
 type EthGetLogParam struct {
-    FromBlock string    `json:"fromBlock"`
-    ToBlock string  `json:"toBlock"`
-    Address string  `json:"address"`
-    Topics string   `json:"topics"`
-    BlockHash string    `json:"blockhash"`
+    FromBlock string    `json:"fromBlock,omitempty"`
+    ToBlock string  `json:"toBlock,omitempty"`
+    Address string  `json:"address,omitempty"`
+    Topics string   `json:"topics,omitempty"`
+    BlockHash string    `json:"blockhash,omitempty"`
 }
 
 type EthGetTransactionParam struct {
@@ -89,7 +89,7 @@ type EthGetTransactionParam struct {
 
 type EthGetBlockByNumberParam struct {
     BlockNumber string  `json:"blockNumber"`
-    DetailFlag bool `json:"detailFlag"`
+    DetailFlag bool `json:"detailFlag,omitempty"`
 }
 
 type EthGetTransactionReceiptParam struct {
@@ -98,28 +98,28 @@ type EthGetTransactionReceiptParam struct {
 
 type ApiLogParam struct {
     Method string   `json:"method"`
-    Params EthGetLogParam   `json:"params"`
+    Params []interface{}   `json:"params"`
     Id int  `json:"id"`
     Jsonrpc string  `json:"jsonrpc"`
 }
 
 type ApiTransactionParam struct {
     Method string   `json:"method"`
-    Params EthGetTransactionParam   `json:"params"`
+    Params []interface{}   `json:"params"`
     Id int  `json:"id"`
     Jsonrpc string  `json:"jsonrpc"`
 }
 
 type ApiBlockParam struct {
     Method string   `json:"method"`
-    Params EthGetBlockByNumberParam `json:"params"`
+    Params []interface{} `json:"params"`
     Id int  `json:"id"`
     Jsonrpc string  `json:"jsonrpc"`
 }
 
 type ApiReceiptParam struct {
     Method string   `json:"method"`
-    Params EthGetTransactionReceiptParam    `json:"params"`
+    Params []interface{}    `json:"params"`
     Id int  `json:"id"`
     Jsonrpc string  `json:"jsonrpc"`
 }
@@ -146,7 +146,7 @@ func organizeData(gethTraceBlockData Block, index int, callStack []int) ErigonBl
     subCallCount := len(gethTraceBlockData.Calls)
 
     oneBlock.BlockHash = ""
-    oneBlock.BlockNumber = 16636490
+    oneBlock.BlockNumber = 0
     oneBlock.Subtraces = subCallCount
     oneBlock.TransactionHash = ""
     oneBlock.TransactionPosition = index
@@ -218,14 +218,14 @@ func eth_getLogs(c *gin.Context) {
     }
 
     // Construct API parameter.
-    ApiParam := ApiLogParam {
-        Method: "eth_getLogs",
-        Params: param,
-        Id : 1,
-        Jsonrpc: "2.0",
-    }
+    // ApiParam := ApiLogParam {
+    //     Method: "eth_getLogs",
+    //     Params: []EthGetLogParam{param},
+    //     Id : 1,
+    //     Jsonrpc: "2.0",
+    // }
 
-    json_data, err := json.Marshal(ApiParam)
+    json_data, err := json.Marshal(param)
     if err != nil {
         log.Fatal(err)
     }
@@ -237,91 +237,15 @@ func eth_getLogs(c *gin.Context) {
         log.Fatal(err)
     }
 
-    var res map[string]interface{}
+    defer resp.Body.Close()
 
-    json.NewDecoder(resp.Body).Decode(&res)
-
-    c.IndentedJSON(http.StatusOK, res)
-}
-
-func eth_getTransactionByHash(c *gin.Context) {
-    var param ApiTransactionParam
-
-    // Call BindJSON to bind the received JSON to
-    // param.
-    if err := c.BindJSON(&param); err != nil {
-        return
-    }
-
-    // Construct API parameter.
-    ApiParam := ApiTransactionParam {
-        Method: "eth_getTransactionByHash",
-        Params: param,
-        Id : 1,
-        Jsonrpc: "2.0",
-    }
-
-    json_data, err := json.Marshal(ApiParam)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    resp, err := http.Post(QuickNodeURL, "application/json",
-        bytes.NewBuffer(json_data))
+    body, err := ioutil.ReadAll(resp.Body)
 
     if err != nil {
         log.Fatal(err)
     }
 
-    var gethTraceData GethTransactionTraceData
-
-    json.Unmarshal(resp.Body, &gethTraceData)
-
-    convertTransactionTraceData(gethTraceData)
-
-    res, _ := json.MarshalIndent(erigonTraceData, "", "\t")
-
-    c.IndentedJSON(http.StatusOK, res)
-}
-
-func eth_getBlockByNumber(c *gin.Context) {
-    var param ApiBlockParam
-
-    // Call BindJSON to bind the received JSON to
-    // param.
-    if err := c.BindJSON(&param); err != nil {
-        return
-    }
-
-    // Construct API parameter.
-    ApiParam := ApiBlockParam {
-        Method: "eth_getBlockByNumber",
-        Params: param,
-        Id : 1,
-        Jsonrpc: "2.0",
-    }
-
-    json_data, err := json.Marshal(ApiParam)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    resp, err := http.Post(QuickNodeURL, "application/json",
-        bytes.NewBuffer(json_data))
-
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    var gethTraceData GethBlockTraceData
-
-    json.Unmarshal(resp.Body, &gethTraceData)
-
-    convertBlockTraceData(gethTraceData)
-
-    res, _ := json.MarshalIndent(erigonTraceData, "", "\t")
-
-    c.IndentedJSON(http.StatusOK, res)
+    c.IndentedJSON(http.StatusOK, string(body))
 }
 
 func eth_getTransactionReceipt(c *gin.Context) {
@@ -334,14 +258,14 @@ func eth_getTransactionReceipt(c *gin.Context) {
     }
 
     // Construct API parameter.
-    ApiParam := ApiReceiptParam {
-        Method: "eth_getTransactionReceipt",
-        Params: param,
-        Id : 1,
-        Jsonrpc: "2.0",
-    }
+    // ApiParam := ApiReceiptParam {
+    //     Method: "eth_getTransactionReceipt",
+    //     Params: []string{param.Hash},
+    //     Id : 1,
+    //     Jsonrpc: "2.0",
+    // }
 
-    json_data, err := json.Marshal(ApiParam)
+    json_data, err := json.Marshal(param)
     if err != nil {
         log.Fatal(err)
     }
@@ -353,19 +277,200 @@ func eth_getTransactionReceipt(c *gin.Context) {
         log.Fatal(err)
     }
 
-    var res map[string]interface{}
+    defer resp.Body.Close()
 
-    json.NewDecoder(resp.Body).Decode(&res)
+    body, err := ioutil.ReadAll(resp.Body)
 
-    c.IndentedJSON(http.StatusOK, res)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    c.IndentedJSON(http.StatusOK, string(body))
+}
+
+func eth_getTransactionByHash(c *gin.Context) {
+    var param ApiTransactionParam
+
+    // Call BindJSON to bind the received JSON to
+    // param.
+    if err := c.BindJSON(&param); err != nil {
+        return
+    }
+
+    // Construct API parameter.
+    // ApiParam := ApiReceiptParam {
+    //     Method: "eth_getTransactionReceipt",
+    //     Params: []string{param.Hash},
+    //     Id : 1,
+    //     Jsonrpc: "2.0",
+    // }
+
+    json_data, err := json.Marshal(param)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    resp, err := http.Post(QuickNodeURL, "application/json",
+        bytes.NewBuffer(json_data))
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    c.IndentedJSON(http.StatusOK, string(body))
+}
+
+func eth_getBlockByNumber(c *gin.Context) {
+    var param ApiBlockParam
+
+    // Call BindJSON to bind the received JSON to
+    // param.
+    if err := c.BindJSON(&param); err != nil {
+        return
+    }
+
+    // Construct API parameter.
+    // ApiParam := ApiReceiptParam {
+    //     Method: "eth_getTransactionReceipt",
+    //     Params: []string{param.Hash},
+    //     Id : 1,
+    //     Jsonrpc: "2.0",
+    // }
+
+    json_data, err := json.Marshal(param)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    resp, err := http.Post(QuickNodeURL, "application/json",
+        bytes.NewBuffer(json_data))
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    c.IndentedJSON(http.StatusOK, string(body))
+}
+
+func debug_traceTransaction(c *gin.Context) {
+    var param ApiTransactionParam
+
+    // Call BindJSON to bind the received JSON to
+    // param.
+    if err := c.BindJSON(&param); err != nil {
+        return
+    }
+
+    // Construct API parameter.
+    // ApiParam := ApiTransactionParam {
+    //     Method: "eth_getTransactionByHash",
+    //     Params: []string{param.Hash},
+    //     Id : 1,
+    //     Jsonrpc: "2.0",
+    // }
+
+    json_data, err := json.Marshal(param)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    resp, err := http.Post(QuickNodeURL, "application/json",
+        bytes.NewBuffer(json_data))
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var gethTraceData GethTransactionTraceData
+
+    json.Unmarshal(body, &gethTraceData)
+
+    convertTransactionTraceData(gethTraceData)
+
+    c.IndentedJSON(http.StatusOK, erigonTraceData)
+}
+
+func debug_traceBlockByNumber(c *gin.Context) {
+    var param ApiBlockParam
+
+    // Call BindJSON to bind the received JSON to
+    // param.
+    if err := c.BindJSON(&param); err != nil {
+        return
+    }
+
+    // Construct API parameter.
+    // ApiParam := ApiBlockParam {
+    //     Method: "eth_getBlockByNumber",
+    //     Params: []interface{}{
+    //         "0xc5043f", false,
+    //     },
+    //     Id : 1,
+    //     Jsonrpc: "2.0",
+    // }
+
+    json_data, err := json.Marshal(param)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    resp, err := http.Post(QuickNodeURL, "application/json",
+        bytes.NewBuffer(json_data))
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    var gethTraceData GethBlockTraceData
+
+    json.Unmarshal(body, &gethTraceData)
+
+    convertBlockTraceData(gethTraceData)
+
+    c.IndentedJSON(http.StatusOK, erigonTraceData)
 }
 
 func main() {
     router := gin.Default()
+    fmt.Println("Proxy server started!")
     router.POST("/eth_getLogs", eth_getLogs)
     router.POST("/eth_getTransactionByHash", eth_getTransactionByHash)
-    router.POST("/eth_getBlockByNumber", eth_getBlockByNumber)
+    router.POST("/eth_getBlockByNumber", eth_getBlockByNumber)    
     router.POST("/eth_getTransactionReceipt", eth_getTransactionReceipt)
+    router.POST("/debug_traceBlockByNumber", debug_traceBlockByNumber)
+    router.POST("/debug_traceTransaction", debug_traceTransaction)
 
     router.Run("localhost:8080")
 }
